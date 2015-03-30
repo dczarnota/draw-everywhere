@@ -1,10 +1,14 @@
 body {
-  padding-top: 70px;
+  background-color: #E1F5FE;
 }
 
 .navbar {
-  background-color: #651FFF;
+  background-color: #0091EA;
   color: #FFFFFF;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  position: fixed;
+  border-color: #0091EA;
+  border-width: 0 0 0;
 }
 
 .navbar-default .navbar-brand {
@@ -21,6 +25,39 @@ body {
 
 .navbar .nav > li > a:hover {
   color: #FFD600;
+}
+
+header {
+  text-align: center;
+  background-color: #E1F5FE;
+}
+
+header .container-fluid {
+  padding-top: 100px;
+  padding-bottom: 25px;
+}
+
+.header-text {
+  font-size: 3.5em;
+  font-weight: 100;
+}
+
+#canvas-container {
+  text-align: center;
+  padding-bottom: 40px;
+}
+
+.canvas-text {
+  font-size: 1.5em;
+  font-weight: 200;
+  padding-bottom: 5px;
+}
+
+#drawing-canvas {
+  background-color: #FFFFFF;
+  width: 600px;
+  height: 400px;
+
 }
 
 /* Responsive: Portrait tablets and up */

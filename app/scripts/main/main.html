@@ -1,10 +1,31 @@
 <div ng-include=" 'app/scripts/components/navbar/navbar.html' "></div>
 <div ng-controller="MainController">
 
-  <div class="container-fluid">
-    <div class="row">
-      <p>Hello, world!</p>
+  <header>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="header-text">
+            <h>Start Drawing!</h>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </header>
+
+  <section id="canvas-container">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12 canvas-text">
+          <h>the canvas</h>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-12">
+          <canvas id="drawing-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
 
 </div>
