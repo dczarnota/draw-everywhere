@@ -21,7 +21,23 @@ angular.module('drawEverywhere')
         // Mousemove event to draw will not be activated until mousedown event is registered
         var startDrawing = false;
 
-        var color = 'blue';
+        // Random color function
+        var generateRandomColor = function(){
+          // Set r,g,b values to 255 for white.
+          var r = 255, g = 255, b = 255;
+
+          // Since canvas is white, generate a random color that is not equal to white, or RGB(255, 255, 255).
+          while(r===255 && g===255 && b===255){
+            r = Math.floor(Math.random() * 256);
+            g = Math.floor(Math.random() * 256);
+            b = Math.floor(Math.random() * 256);
+          }
+
+          var randomColor = 'RGB(' + r.toString() + ',' + g.toString() + ',' + b.toString() + ')';
+          return randomColor;
+        }
+
+        var color = generateRandomColor();
 
         // draw function will do the actual canvas drawing
         var draw = function(moveX, moveY, lineToX, lineToY){
