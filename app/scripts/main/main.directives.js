@@ -1,5 +1,5 @@
 angular.module('drawEverywhere')
-  .directive('canvasDraw', function(){
+  .directive('canvasDraw', function(socket){
     return {
       restrict: 'A',
       link: function(scope, element, attrs){
@@ -51,11 +51,17 @@ angular.module('drawEverywhere')
           ctx.stroke();
         }
 
+        // New start and end XY coordinates from another user are sent here
+          // Socket executes draw function with data from the other user's drawing movements
+        socket.on('draw', function(data){
+          return draw(data.startX, data.startY, data.endX, data.endY);
+        });
+
         element.bind('mousedown', function(event){
           startX = event.offsetX;
           startY = event.offsetY;
 
-          // Begin canvas path to initialize  drawing
+          // Begin canvas path to initialize drawing
           ctx.beginPath();
           startDrawing = true;
         });
@@ -67,6 +73,15 @@ angular.module('drawEverywhere')
 
             // Invoke draw function with start and end coordinates
             draw(startX, startY, endX, endY);
+
+            // Send all start and end XY coordinates
+              // This will then execute socket.on('draw') above
+            socket.emit('drawing', { 
+              startX: startX,
+              startY: startY,
+              endX: endX,
+              endY: endY
+            });
 
             // Previous end X and Y coordinates become the new start coordinates
             startX = endX;

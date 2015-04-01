@@ -1,4 +1,4 @@
 angular.module('drawEverywhere')
-  .controller('MainController', function(){
+  .controller('MainController', function($scope, socket){
 
   });
