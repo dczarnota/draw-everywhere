@@ -58,8 +58,9 @@ angular.module('drawEverywhere')
         });
 
         element.bind('mousedown', function(event){
-          startX = event.offsetX;
-          startY = event.offsetY;
+          // event.offset if using Chrome, otherwise second half of statement if using Firefox
+          startX = event.offsetX || event.clientX - $(event.target).offset().left;
+          startY = event.offsetY || event.clientY - $(event.target).offset().top;
 
           // Begin canvas path to initialize drawing
           ctx.beginPath();
@@ -68,8 +69,8 @@ angular.module('drawEverywhere')
 
         element.bind('mousemove', function(event){
           if(startDrawing){
-            endX = event.offsetX;
-            endY = event.offsetY;
+            endX = event.offsetX || event.clientX - $(event.target).offset().left;
+            endY = event.offsetY || event.clientY - $(event.target).offset().top;
 
             // Invoke draw function with start and end coordinates
             draw(startX, startY, endX, endY);
