@@ -32,7 +32,6 @@ angular.module('drawEverywhere')
             g = Math.floor(Math.random() * 256);
             b = Math.floor(Math.random() * 256);
           }
-
           var randomColor = 'RGB(' + r.toString() + ',' + g.toString() + ',' + b.toString() + ')';
           return randomColor;
         }
@@ -40,7 +39,9 @@ angular.module('drawEverywhere')
         var color = generateRandomColor();
 
         // draw function will do the actual canvas drawing
-        var draw = function(moveX, moveY, lineToX, lineToY){
+        var draw = function(moveX, moveY, lineToX, lineToY, color){
+          // Begin canvas path to initialize drawing
+          ctx.beginPath()
           // Initial mouse location
           ctx.moveTo(moveX, moveY);
           // Draw line to new mouse location
@@ -49,12 +50,14 @@ angular.module('drawEverywhere')
           ctx.strokeStyle = color;
           // Executes the drawing stroke
           ctx.stroke();
+          // Close path to finish drawing
+          ctx.closePath();
         }
 
         // New start and end XY coordinates from another user are sent here
           // Socket executes draw function with data from the other user's drawing movements
         socket.on('draw', function(data){
-          return draw(data.startX, data.startY, data.endX, data.endY);
+          return draw(data.startX, data.startY, data.endX, data.endY, data.color);
         });
 
         element.bind('mousedown', function(event){
@@ -62,8 +65,6 @@ angular.module('drawEverywhere')
           startX = event.offsetX || event.clientX - $(event.target).offset().left;
           startY = event.offsetY || event.clientY - $(event.target).offset().top;
 
-          // Begin canvas path to initialize drawing
-          ctx.beginPath();
           startDrawing = true;
         });
 
@@ -73,7 +74,7 @@ angular.module('drawEverywhere')
             endY = event.offsetY || event.clientY - $(event.target).offset().top;
 
             // Invoke draw function with start and end coordinates
-            draw(startX, startY, endX, endY);
+            draw(startX, startY, endX, endY, color);
 
             // Send all start and end XY coordinates
               // This will then execute socket.on('draw') above
@@ -81,7 +82,8 @@ angular.module('drawEverywhere')
               startX: startX,
               startY: startY,
               endX: endX,
-              endY: endY
+              endY: endY,
+              color: color
             });
 
             // Previous end X and Y coordinates become the new start coordinates
@@ -91,7 +93,6 @@ angular.module('drawEverywhere')
         });
 
         element.bind('mouseup', function(event){
-          ctx.closePath();
           // End drawing during mousemove
           startDrawing = false;
         });
