@@ -57,6 +57,25 @@ header .container-fluid {
   background-color: #FFFFFF;
 }
 
+.button-row {
+  text-align: center;
+}
+
+.btn {
+  text-align: center;
+  border-radius: 9px;
+  border-width: 1px;
+  border-color: #0091EA;
+  background-color: #E1F5FE;
+  font-size: 1.7em;
+  font-weight: 200;
+}
+
+.btn:hover {
+  background-color: #0091EA;
+  color: #FFD600;
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   .container {
