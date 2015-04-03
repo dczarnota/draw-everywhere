@@ -43,17 +43,13 @@ angular.module('drawEverywhere')
           ctx.closePath();
           // Capture state of current canvas as a data url
           currentCanvas = canvas.toDataURL();
-          // Socket sends state of current canvas
-          socket.emit('stateOfCanvas', {
-            currentCanvas: currentCanvas
-          });
         };
 
         // This function takes the currentCanvas data url and translates the information as an image to display on the <canvas> html element. 
           // Therefore, a new user will see what was already drawn before he/she connected
         var loadCanvas = function(currentCanvas){
           var imageObj = new Image();
-          imageObj.onload = function() {
+          imageObj.onload = function(){
             ctx.drawImage(this, 0, 0);
           };
           imageObj.src = currentCanvas;
@@ -79,13 +75,12 @@ angular.module('drawEverywhere')
 
             // Send all start and end XY coordinates to socket
               // This will then execute socket.on('draw')
-            socket.emit('drawing', { 
+            socket.emit('drawing', {
               startX: startX,
               startY: startY,
               endX: endX,
               endY: endY,
-              color: color,
-              currentCanvas: currentCanvas
+              color: color
             });
 
             // Previous end X and Y coordinates become the new start coordinates
@@ -97,11 +92,15 @@ angular.module('drawEverywhere')
         element.bind('mouseup', function(event){
           // End drawing during mousemove
           startDrawing = false;
+          // Socket sends state of current canvas
+          socket.emit('stateOfCanvas', {
+            currentCanvas: currentCanvas
+          });
         });
 
       // Event listener for clear canvas button. Will clear the canvas for the user
       document.getElementById('btn-clear').addEventListener('click', function(){
-        ClearCanvasFactory.clearCanvas(ctx, canvas);  
+        ClearCanvasFactory.clearCanvas(ctx, canvas);
       }, false);
 
 
@@ -117,7 +116,7 @@ angular.module('drawEverywhere')
         // On new connection, load the current state of the canvas
         socket.on('loadCanvas', function(data){
           loadCanvas(data.currentCanvas);
-        })
+        });
        });
 
       }
