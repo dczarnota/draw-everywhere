@@ -3,9 +3,10 @@ var app = express();
 var http = require('http');
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
+var port = process.env.PORT || 8080;
 
-server.listen(8080, function(){
-  console.log('Listening on port:8080');
+server.listen(port, function(){
+  console.log('Listening on port:' + port);
 });
 
 // Serve all client files
@@ -40,6 +41,4 @@ io.on('connection', function(socket){
   socket.emit('loadCanvas', {
     currentCanvas: latestCanvas
   });
-
 });
-
