@@ -16,19 +16,15 @@ var latestCanvas;
 
 // Setup socket.io connection
 io.on('connection', function(socket){
-  console.log('Socket connected.');
 
   // Socket sends all start and end XY data points across websockets to update canvas drawing
   socket.on('drawing', function(data){
-    console.log('data: '+data.startX, data.startY, data.endX, data.endY, data.color);
-
     socket.broadcast.emit('draw', { 
       startX: data.startX,
       startY: data.startY,
       endX: data.endX,
       endY: data.endY,
-      color: data.color,
-      currentCanvas: data.latestCanvas
+      color: data.color
     });
   });
 
