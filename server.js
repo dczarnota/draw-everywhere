@@ -11,14 +11,13 @@ server.listen(8080, function(){
 // Serve all client files
 app.use(express.static(__dirname + '/'));
 
-var connectedClients = {};
+var latestCanvas;
 
 // Setup socket.io connection
 io.on('connection', function(socket){
   console.log('Socket connected.');
 
-  // Listens for socket.emit in main.directives.js
-    // Socket sends all start and end XY data points across websockets to update canvas drawing
+  // Socket sends all start and end XY data points across websockets to update canvas drawing
   socket.on('drawing', function(data){
     console.log('data: '+data.startX, data.startY, data.endX, data.endY, data.color);
 
@@ -27,8 +26,20 @@ io.on('connection', function(socket){
       startY: data.startY,
       endX: data.endX,
       endY: data.endY,
-      color: data.color
+      color: data.color,
+      currentCanvas: data.latestCanvas
     });
-
   });
+
+  // On any changes to the canvas, socket will update latestCanvas with the current version of the canvas
+  socket.on('stateOfCanvas', function(data){
+    latestCanvas = data.currentCanvas;  
+  });
+
+  // When a new user connects, send latestCanvas data
+  socket.emit('loadCanvas', {
+    currentCanvas: latestCanvas
+  });
+
 });
+

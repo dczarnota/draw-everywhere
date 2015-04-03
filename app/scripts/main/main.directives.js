@@ -1,5 +1,5 @@
 angular.module('drawEverywhere')
-  .directive('canvasDraw', function(socket){
+  .directive('canvasDraw', function(socket, RandomColorFactory, ClearCanvasFactory){
     return {
       restrict: 'A',
       link: function(scope, element, attrs){
@@ -18,30 +18,19 @@ angular.module('drawEverywhere')
         // Mouse coordinates (start for mousedown and end for mousemove)
         var startX, startY, endX, endY;
 
-        // Mousemove event to draw will not be activated until mousedown event is registered
+        // Mousemove event to draw will not be activated until mousedown event is registered (this will toggle startDrawing to true)
         var startDrawing = false;
 
-        // Random color function
-        var generateRandomColor = function(){
-          // Set r,g,b values to 255 for white.
-          var r = 255, g = 255, b = 255;
+        // Create unique random color for each user
+        var color = RandomColorFactory.generateRandomColor();
 
-          // Since canvas is white, generate a random color that is not equal to white, or RGB(255, 255, 255).
-          while(r===255 && g===255 && b===255){
-            r = Math.floor(Math.random() * 256);
-            g = Math.floor(Math.random() * 256);
-            b = Math.floor(Math.random() * 256);
-          }
-          var randomColor = 'RGB(' + r.toString() + ',' + g.toString() + ',' + b.toString() + ')';
-          return randomColor;
-        }
-
-        var color = generateRandomColor();
+        // This variable will capture the state of the canvas 
+        var currentCanvas;
 
         // draw function will do the actual canvas drawing
         var draw = function(moveX, moveY, lineToX, lineToY, color){
           // Begin canvas path to initialize drawing
-          ctx.beginPath()
+          ctx.beginPath();
           // Initial mouse location
           ctx.moveTo(moveX, moveY);
           // Draw line to new mouse location
@@ -52,16 +41,28 @@ angular.module('drawEverywhere')
           ctx.stroke();
           // Close path to finish drawing
           ctx.closePath();
-        }
+          // Capture state of current canvas as a data url
+          currentCanvas = canvas.toDataURL();
+          // Socket sends state of current canvas
+          socket.emit('stateOfCanvas', {
+            currentCanvas: currentCanvas
+          });
+        };
 
-        // New start and end XY coordinates from another user are sent here
-          // Socket executes draw function with data from the other user's drawing movements
-        socket.on('draw', function(data){
-          return draw(data.startX, data.startY, data.endX, data.endY, data.color);
-        });
+        // This function takes the currentCanvas data url and translates the information as an image to display on the <canvas> html element. 
+          // Therefore, a new user will see what was already drawn before he/she connected
+        var loadCanvas = function(currentCanvas){
+          var imageObj = new Image();
+          imageObj.onload = function() {
+            ctx.drawImage(this, 0, 0);
+          };
+          imageObj.src = currentCanvas;
+        };
 
+        // On mousedown event for the canvas element
         element.bind('mousedown', function(event){
-          // event.offset if using Chrome, otherwise second half of statement if using Firefox
+          // If browser is Chrome, then: event.offsetX
+          // Else if browser is Firefox, then: event.clientX - $(event.target).offset().left;
           startX = event.offsetX || event.clientX - $(event.target).offset().left;
           startY = event.offsetY || event.clientY - $(event.target).offset().top;
 
@@ -76,14 +77,15 @@ angular.module('drawEverywhere')
             // Invoke draw function with start and end coordinates
             draw(startX, startY, endX, endY, color);
 
-            // Send all start and end XY coordinates
-              // This will then execute socket.on('draw') above
+            // Send all start and end XY coordinates to socket
+              // This will then execute socket.on('draw')
             socket.emit('drawing', { 
               startX: startX,
               startY: startY,
               endX: endX,
               endY: endY,
-              color: color
+              color: color,
+              currentCanvas: currentCanvas
             });
 
             // Previous end X and Y coordinates become the new start coordinates
@@ -96,6 +98,28 @@ angular.module('drawEverywhere')
           // End drawing during mousemove
           startDrawing = false;
         });
+
+      // Event listener for clear canvas button. Will clear the canvas for the user
+      document.getElementById('btn-clear').addEventListener('click', function(){
+        ClearCanvasFactory.clearCanvas(ctx, canvas);  
+      }, false);
+
+
+       //Socket IO Events
+
+       // Socket executes draw function with data from the other user's drawing movements
+       socket.on('draw', function(data){
+         draw(data.startX, data.startY, data.endX, data.endY, data.color);
+       });
+
+       // Socket listens for new client connection
+       socket.on('connect', function(){
+        // On new connection, load the current state of the canvas
+        socket.on('loadCanvas', function(data){
+          loadCanvas(data.currentCanvas);
+        })
+       });
+
       }
     }
   });
